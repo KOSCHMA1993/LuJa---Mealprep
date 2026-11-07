@@ -1,0 +1,28 @@
+(async()=>{
+ const {createClient}=await import('https://esm.sh/@supabase/supabase-js@2');
+ const url=localStorage.sbUrl,key=localStorage.sbKey;if(!url||!key)return;
+ const sb=createClient(url,key,{auth:{persistSession:true,autoRefreshToken:true}});
+ let user=(await sb.auth.getUser()).data.user;if(!user)return;
+ const $=s=>document.querySelector(s),esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const toast=m=>{const t=$('#toast');if(t){t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000)}};
+ function friday(){const d=new Date();d.setHours(12,0,0,0);const day=d.getDay();const back=(day+2)%7;d.setDate(d.getDate()-back);return d}
+ const iso=d=>d.toISOString().slice(0,10), days=()=>Array.from({length:7},(_,i)=>{const d=friday();d.setDate(d.getDate()+i);return d});
+ let recipes=[],meals=[];
+ async function data(){recipes=(await sb.from('recipes').select('id,name,servings,ingredients(name,quantity,unit,category,store)').order('name')).data||[];const ds=days();meals=(await sb.from('meal_plan').select('*,recipes(name)').gte('date',iso(ds[0])).lte('date',iso(ds[6])).order('date').order('slot')).data||[]}
+ async function syncMeal(mid,rid){await sb.from('shopping_items').delete().eq('source_plan_id',mid);if(!rid)return;const meal=meals.find(x=>x.id===mid),r=recipes.find(x=>x.id===rid);if(!r)return;const rows=(r.ingredients||[]).map(i=>({user_id:user.id,name:i.name,quantity:i.quantity,unit:i.unit,category:i.category||'Sonstiges',store:i.store||'Naturgut',manual:false,source_plan_id:mid}));if(rows.length){const {error}=await sb.from('shopping_items').insert(rows);if(error)throw error}}
+ function prepDialog(m){const f=$('#mealForm');if(!f)return;let sel=f.querySelector('[name=weekday]');if(!sel){sel=document.createElement('select');sel.name='weekday';sel.innerHTML=days().map((d,i)=>`<option value="${i}">${d.toLocaleDateString('de-DE',{weekday:'long'})}</option>`).join('');const old=f.querySelector('[name=date]');old.closest('label').innerHTML='Wochentag';old.closest('label').append(sel);const portions=f.querySelector('[name=servings]');if(portions)portions.closest('label').style.display='none'}
+  f.meal_id.value=m?.id||'';sel.value=m?Math.max(0,days().findIndex(d=>iso(d)===m.date)):0;f.slot.value=m?.slot||'Abendessen';f.recipe_id.innerHTML='<option value="">Kein Rezept</option>'+recipes.map(r=>`<option value="${r.id}">${esc(r.name)}</option>`).join('');f.recipe_id.value=m?.recipe_id||'';f.free_text.value=m?.free_text||'';$('#mealDialog h2').textContent=m?'Eintrag bearbeiten':'Essen einplanen'}
+ function render(){const root=$('#planList');if(!root)return;root.innerHTML=`<div class="week-v10">${days().map(d=>{const list=meals.filter(m=>m.date===iso(d));return `<section class="day-v10"><h2>${d.toLocaleDateString('de-DE',{weekday:'long'})}</h2>${list.map(m=>`<article class="meal"><small>${esc(m.slot)}</small><h3>${esc(m.recipes?.name||m.free_text||'Offen')}</h3><div class="meal-actions"><button type="button" data-edit-v10="${m.id}" class="edit">Bearbeiten</button><button type="button" data-del-v10="${m.id}" class="delete">Löschen</button></div></article>`).join('')||'<p class="empty-v10">Noch offen</p>'}</section>`}).join('')}</div>`}
+ async function refresh(){await data();render()}
+ document.addEventListener('click',async e=>{
+  const open=e.target.closest('[data-open="mealDialog"]');if(open){e.preventDefault();e.stopImmediatePropagation();prepDialog(null);$('#mealDialog').showModal();return}
+  const edit=e.target.closest('[data-edit-v10]');if(edit){prepDialog(meals.find(m=>m.id===edit.dataset.editV10));$('#mealDialog').showModal();return}
+  const del=e.target.closest('[data-del-v10]');if(del){if(!confirm('Eintrag und zugehörige Einkäufe löschen?'))return;const id=del.dataset.delV10;await sb.from('shopping_items').delete().eq('source_plan_id',id);const {error}=await sb.from('meal_plan').delete().eq('id',id);if(error)return toast(error.message);await refresh();if(typeof window.loadShopping==='function')window.loadShopping();toast('Eintrag und Einkäufe gelöscht.');return}
+  if(e.target.closest('[data-page="plan"]'))setTimeout(refresh,50);
+ },true);
+ $('#mealForm')?.addEventListener('submit',async e=>{
+  if(e.submitter?.value==='cancel')return;e.preventDefault();e.stopImmediatePropagation();const f=new FormData(e.target),id=f.get('meal_id'),rid=f.get('recipe_id')||null,d=days()[+f.get('weekday')];const r=recipes.find(x=>x.id===rid);const payload={user_id:user.id,date:iso(d),slot:f.get('slot'),recipe_id:rid,servings:r?.servings||2,free_text:f.get('free_text')};const res=id?await sb.from('meal_plan').update(payload).eq('id',id).select().single():await sb.from('meal_plan').insert(payload).select().single();if(res.error)return toast(res.error.message);await data();try{await syncMeal(res.data.id,rid)}catch(x){return toast(x.message)}e.target.closest('dialog').close();render();toast(id?'Plan und Einkauf aktualisiert.':'Essen und Einkauf hinzugefügt.');
+ },true);
+ const style=document.createElement('style');style.textContent='.week-v10{display:grid;grid-template-columns:repeat(7,minmax(155px,1fr));gap:10px;overflow-x:auto;padding-bottom:8px}.day-v10{background:#eef3f0;border-radius:14px;padding:10px;min-height:180px}.day-v10 h2{font-size:1rem;margin:0 0 9px;color:#356859}.day-v10 .meal{padding:10px}.day-v10 h3{font-size:.95rem}.empty-v10{color:#7a8781;font-size:.88rem}@media(max-width:700px){.week-v10{grid-template-columns:repeat(7,78vw);scroll-snap-type:x mandatory}.day-v10{scroll-snap-align:start}}';document.head.append(style);
+ await refresh();
+})();

@@ -13,7 +13,7 @@
   <link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
-<header><div><strong>Unser Essensplan <small class="version">v9</small></strong><small id="status">Nicht verbunden</small></div><button id="logout" class="ghost hidden" type="button">Abmelden</button></header>
+<header><div><strong>Unser Essensplan <small class="version">v10</small></strong><small id="status">Nicht verbunden</small></div><button id="logout" class="ghost hidden" type="button">Abmelden</button></header>
 <main>
 <section id="setup" class="card"><h1>Einmalig verbinden</h1><p>Trage Supabase-Projekt-URL und Publishable- oder Anon-Key ein.</p><label>Projekt-URL<input id="url" placeholder="https://dein-projekt.supabase.co"></label><label>Publishable- oder Anon-Key<input id="key" type="password" placeholder="sb_publishable_... oder eyJ..."></label><button id="saveSetup" type="button">Speichern</button><p class="hint">Niemals den service_role-Key oder das Datenbankpasswort verwenden.</p></section>
 <section id="auth" class="card hidden"><h1>Anmelden</h1><label>E-Mail<input id="email" type="email" autocomplete="email"></label><label>Passwort<input id="password" type="password" minlength="6" autocomplete="current-password"></label><div class="row"><button id="signin" type="button">Anmelden</button><button id="signup" class="secondary" type="button">Registrieren</button></div><p id="authMsg" class="hint"></p></section>
@@ -29,5 +29,6 @@
 <div id="toast" role="status"></div>
 <script type="module" src="app.js?v=9"></script>
 <script src="v9-patch.js?v=9"></script>
+<script src="v10-wochenplan.js?v=10"></script>
 </body>
 </html>
