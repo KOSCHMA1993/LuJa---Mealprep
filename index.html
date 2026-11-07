@@ -2,150 +2,32 @@
 <html lang="de">
 <head>
   <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1, viewport-fit=cover"
-  >
-
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#356859">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-
   <title>Unser Essensplan</title>
-
   <link rel="manifest" href="manifest.webmanifest?v=9">
   <link rel="stylesheet" href="styles.css?v=9">
   <link rel="stylesheet" href="v9-styles.css?v=9">
-
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icon.svg">
 </head>
-
 <body>
-
-  <header>
-    <div>
-      <strong>
-        Unser Essensplan
-        <small class="version">v9</small>
-      </strong>
-
-      <small id="status">Nicht verbunden</small>
-    </div>
-
-    <button id="logout" class="ghost hidden" type="button">
-      Abmelden
-    </button>
-  </header>
-
-  <main>
-
-    <section id="setup" class="card">
-      <h1>Einmalig verbinden</h1>
-
-      <p>
-        Trage die Supabase-Projekt-URL und den öffentlichen
-        Publishable- beziehungsweise Anon-Key ein.
-      </p>
-
-      <label>
-        Projekt-URL
-
-        <input
-          id="url"
-          placeholder="https://dein-projekt.supabase.co"
-        >
-      </label>
-
-      <label>
-        Publishable- oder Anon-Key
-
-        <input
-          id="key"
-          type="password"
-          placeholder="sb_publishable_... oder eyJ..."
-        >
-      </label>
-
-      <button id="saveSetup" type="button">
-        Speichern
-      </button>
-
-      <p class="hint">
-        Niemals den service_role-Key oder das Datenbankpasswort verwenden.
-      </p>
-    </section>
-
-    <section id="auth" class="card hidden">
-      <h1>Anmelden</h1>
-
-      <label>
-        E-Mail
-
-        <input
-          id="email"
-          type="email"
-          autocomplete="email"
-        >
-      </label>
-
-      <label>
-        Passwort
-
-        <input
-          id="password"
-          type="password"
-          minlength="6"
-          autocomplete="current-password"
-        >
-      </label>
-
-      <div class="row">
-        <button id="signin" type="button">
-          Anmelden
-        </button>
-
-        <button id="signup" class="secondary" type="button">
-          Registrieren
-        </button>
-      </div>
-
-      <p id="authMsg" class="hint"></p>
-    </section>
-
-    <section id="app" class="hidden">
-
-      <nav>
-        <button data-page="plan" class="active" type="button">
-          Woche
-        </button>
-
-        <button data-page="recipes" type="button">
-          Rezepte
-        </button>
-
-        <button data-page="shopping" type="button">
-          Einkauf
-        </button>
-      </nav>
-
-      <div id="plan" class="page">
-
-        <div class="title">
-          <h1>Wochenplan</h1>
-
-          <button data-open="mealDialog" type="button">
-            + Essen
-          </button>
-        </div>
-
-        <div id="planList"></div>
-      </div>
-
-      <div id="recipes" class="page hidden">
-
-        <div class="title">
-          <h1>Rezepte</h1>
-
-          <button data-open="recipeDialog
+<header><div><strong>Unser Essensplan <small class="version">v9</small></strong><small id="status">Nicht verbunden</small></div><button id="logout" class="ghost hidden" type="button">Abmelden</button></header>
+<main>
+<section id="setup" class="card"><h1>Einmalig verbinden</h1><p>Trage Supabase-Projekt-URL und Publishable- oder Anon-Key ein.</p><label>Projekt-URL<input id="url" placeholder="https://dein-projekt.supabase.co"></label><label>Publishable- oder Anon-Key<input id="key" type="password" placeholder="sb_publishable_... oder eyJ..."></label><button id="saveSetup" type="button">Speichern</button><p class="hint">Niemals den service_role-Key oder das Datenbankpasswort verwenden.</p></section>
+<section id="auth" class="card hidden"><h1>Anmelden</h1><label>E-Mail<input id="email" type="email" autocomplete="email"></label><label>Passwort<input id="password" type="password" minlength="6" autocomplete="current-password"></label><div class="row"><button id="signin" type="button">Anmelden</button><button id="signup" class="secondary" type="button">Registrieren</button></div><p id="authMsg" class="hint"></p></section>
+<section id="app" class="hidden">
+<nav><button data-page="plan" class="active" type="button">Woche</button><button data-page="recipes" type="button">Rezepte</button><button data-page="shopping" type="button">Einkauf</button></nav>
+<div id="plan" class="page"><div class="title"><h1>Wochenplan</h1><button data-open="mealDialog" type="button">+ Essen</button></div><div id="planList"></div></div>
+<div id="recipes" class="page hidden"><div class="title"><h1>Rezepte</h1><button data-open="recipeDialog" type="button">+ Rezept</button></div><input id="recipeSearch" placeholder="Rezepte suchen"><div id="recipeList" class="grid"></div></div>
+<div id="shopping" class="page hidden"><div class="title"><h1>Einkaufsliste</h1><button data-open="itemDialog" type="button">+ Artikel</button></div><div class="row"><button id="generate" type="button">Aus Wochenplan erzeugen</button><button id="clearDone" class="secondary" type="button">Erledigte löschen</button></div><div class="store-filter"><button type="button" class="chip active" data-store="">Alle</button><button type="button" class="chip" data-store="Naturgut">Naturgut</button><button type="button" class="chip" data-store="Lidl">Lidl</button><button type="button" class="chip" data-store="DM">DM</button><button type="button" class="chip" data-store="Sonstiges">Sonstiges</button></div><div id="shoppingList"></div></div>
+</section></main>
+<dialog id="recipeDialog"><form method="dialog" id="recipeForm"><h2>Rezept hinzufügen</h2><label>Name<input name="name" required></label><label>Kategorie<input name="category" placeholder="z. B. Pasta"></label><label>Minuten<input name="duration" type="number" min="0"></label><label>Standardportionen<input name="servings" type="number" min="1" value="2"></label><label>Rezeptfoto aufnehmen oder auswählen<input name="image" type="file" accept="image/jpeg,image/png,image/webp" capture="environment"></label><p class="hint">Beim Bearbeiten ersetzt ein neues Foto das bisherige Bild.</p><img id="imagePreview" class="preview hidden" alt="Bildvorschau"><input name="existing_image_url" type="hidden"><input name="recipe_id" type="hidden"><label>Zutaten <small>eine Zeile: Menge | Einheit | Zutat | Bereich | Geschäft</small><textarea name="ingredients" rows="7" placeholder="500 | g | Spaghetti | Vorrat | Lidl&#10;2 | Stück | Zwiebeln | Gemüse | Naturgut"></textarea></label><label>Zubereitung<textarea name="instructions" rows="5"></textarea></label><div class="row"><button value="cancel" class="secondary" type="button">Abbrechen</button><button id="saveRecipe" value="default" type="submit">Speichern</button></div></form></dialog>
+<dialog id="mealDialog"><form method="dialog" id="mealForm"><h2>Essen einplanen</h2><input name="meal_id" type="hidden"><label>Datum<input name="date" type="date" required></label><label>Mahlzeit<select name="slot"><option>Abendessen</option><option>Mittagessen</option></select></label><label>Rezept<select name="recipe_id" id="mealRecipe"></select></label><label>Portionen<input name="servings" type="number" min="1" value="2"></label><label>Freier Eintrag<input name="free_text" placeholder="Essen gehen, Reste …"></label><div class="row"><button value="cancel" class="secondary" type="button">Abbrechen</button><button id="saveMeal" value="default" type="submit">Speichern</button></div></form></dialog>
+<dialog id="itemDialog"><form method="dialog" id="itemForm"><h2>Artikel hinzufügen</h2><label>Artikel<input name="name" required></label><label>Menge<input name="quantity" type="number" step="0.01"></label><label>Einheit<input name="unit"></label><label>Bereich<input name="category" placeholder="Gemüse, Kühlung, Haushalt …"></label><label>Geschäft<select name="store"><option>Naturgut</option><option>Lidl</option><option>DM</option><option>Sonstiges</option></select></label><div class="row"><button value="cancel" class="secondary" type="button">Abbrechen</button><button id="saveItem" value="default" type="submit">Speichern</button></div></form></dialog>
+<div id="toast" role="status"></div>
+<script type="module" src="app.js?v=9"></script>
+<script src="v9-patch.js?v=9"></script>
+</body>
+</html>
